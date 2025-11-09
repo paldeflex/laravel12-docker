@@ -1,0 +1,15 @@
+# Данные PostgreSQL
+postgres_data/
+
+# IDE файлы
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Логи
+*.log
+
+# Env файлы
+.env
