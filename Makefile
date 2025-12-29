@@ -4,7 +4,7 @@ endif
 
 -include .env
 
-.PHONY: help install build up down stop restart logs shell composer artisan migrate fresh test clean
+.PHONY: help install build up down stop restart logs shell composer artisan migrate fresh test clean redis-cli
 
 help:
 	@echo "Доступные команды:"
@@ -22,6 +22,8 @@ help:
 	@echo "  make fresh      - Пересоздание БД с миграциями"
 	@echo "  make clean      - Полная очистка"
 	@echo "  make status     - Просмотреть активные контейнеры"
+	@echo "  make logs-redis - Просмотр логов Redis"
+	@echo "  make redis-cli  - Вход в Redis CLI"
 
 install:
 	@echo "🚀 Начинаем установку Laravel 12..."
@@ -36,7 +38,7 @@ install:
 	@docker exec -it laravel_php composer create-project laravel/laravel:^12.0 . --no-interaction
 	@echo "🔧 Настройка прав доступа..."
 	@sudo chown -R 1000:1000 src/
-	@echo "⚙️ Настройка БД в .env..."
+	@echo "⚙️ Настройка БД и Redis в .env..."
 	@docker exec laravel_php bash -c "\
 		cp .env .env.backup && \
 		echo 'DB_CONNECTION=pgsql' > .env.tmp && \
@@ -46,7 +48,13 @@ install:
 		echo 'DB_USERNAME=$(DB_USER)' >> .env.tmp && \
 		echo 'DB_PASSWORD=$(DB_PASSWORD)' >> .env.tmp && \
 		echo '' >> .env.tmp && \
-		grep -v '^DB_' .env >> .env.tmp && \
+		echo 'REDIS_HOST=$(REDIS_HOST)' >> .env.tmp && \
+		echo 'REDIS_PORT=$(REDIS_PORT)' >> .env.tmp && \
+		echo 'CACHE_STORE=redis' >> .env.tmp && \
+		echo 'SESSION_DRIVER=redis' >> .env.tmp && \
+		echo 'QUEUE_CONNECTION=redis' >> .env.tmp && \
+		echo '' >> .env.tmp && \
+		grep -v '^DB_' .env | grep -v '^REDIS_' | grep -v '^CACHE_STORE' | grep -v '^SESSION_DRIVER' | grep -v '^QUEUE_CONNECTION' >> .env.tmp && \
 		mv .env.tmp .env"
 	@echo "⏳ Дополнительное ожидание для стабилизации сети..."
 	@sleep 5
@@ -100,11 +108,17 @@ logs-php:
 logs-db:
 	@docker compose logs -f postgres
 
+logs-redis:
+	@docker compose logs -f redis
+
 shell:
 	@docker exec -it laravel_php bash
 
 shell-db:
 	@docker exec -it laravel_postgres psql -U $(DB_USER) -d $(DB_NAME)
+
+redis-cli:
+	@docker exec -it laravel_redis redis-cli
 
 composer:
 	@docker exec -it laravel_php composer $(filter-out $@,$(MAKECMDGOALS))
