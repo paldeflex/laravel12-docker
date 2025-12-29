@@ -1,4 +1,4 @@
-# Laravel 12 + Docker (PHP-FPM 8.4, Nginx, PostgreSQL 18)
+# Laravel 12 + Docker (PHP-FPM 8.4, Nginx, PostgreSQL 18, Redis)
 
 ## 0. Совместимость
 
@@ -21,11 +21,14 @@ DB_USER=laravel_user
 DB_PASSWORD=laravel_user_password
 DB_HOST=postgres
 DB_PORT=5432
+
+REDIS_HOST=redis
+REDIS_PORT=6379
 ```
 
 
 Эти значения:
-- используются при запуске PostgreSQL,
+- используются при запуске PostgreSQL и Redis,
 - подставляются в `.env` Laravel в процессе `make install`.
 
 ## 2. Стек и структура
@@ -34,6 +37,7 @@ DB_PORT=5432
 - PHP 8.4 (FPM) — контейнер `laravel_php`
 - Nginx — контейнер `laravel_nginx`
 - PostgreSQL 18 — контейнер `laravel_postgres`
+- Redis — контейнер `laravel_redis`
 - Laravel 12 — код в директории `src/`
 - Makefile — набор утилитных команд
 
@@ -63,11 +67,12 @@ DB_PORT=5432
 Сценарий выполняет:
 1. Останавливает контейнеры и удаляет их
 2. Пересоздаёт директорию src/ с корректными правами.
-3. Собирает и запускает контейнеры (php, nginx, postgres).
+3. Собирает и запускает контейнеры (php, nginx, postgres, redis).
 4. Устанавливает Laravel 12 в src/.
-5. Обновляет .env Laravel на основе переменных из корневого .env (DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD).
-6. Проверяет подключение к базе данных.
-7. Запускает миграции (php artisan migrate:fresh --force) и php artisan storage:link.
+5. Обновляет .env Laravel на основе переменных из корневого .env (DB_*, REDIS_*).
+6. Настраивает Laravel для использования Redis (CACHE_STORE, SESSION_DRIVER, QUEUE_CONNECTION).
+7. Проверяет подключение к базе данных.
+8. Запускает миграции (php artisan migrate:fresh --force) и php artisan storage:link.
 
 После успешной установки приложение доступно по адресу:
 
@@ -113,6 +118,10 @@ http://localhost
   make logs-db
 ```
 
+```bash
+  make logs-redis
+```
+
 Доступ в контейнер PHP:
 ```bash
   make shell
@@ -121,6 +130,11 @@ http://localhost
 Доступ к PostgreSQL внутри контейнера:
 ```bash
   make shell-db
+```
+
+Доступ к Redis CLI:
+```bash
+  make redis-cli
 ```
 
 Команды Composer внутри контейнера:
