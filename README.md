@@ -1,4 +1,4 @@
-# Laravel 12 + Docker (PHP-FPM 8.4, Nginx, PostgreSQL 18, Redis)
+# Laravel 12 + Docker (PHP-FPM 8.4, Nginx, PostgreSQL 18, Redis, Xdebug)
 
 ## 0. Совместимость
 
@@ -174,7 +174,40 @@ http://localhost
   make fresh
 ```
 
-## 6. Полная очистка
+## 6. Настройка Xdebug в PhpStorm
+
+В образ PHP включен Xdebug 3 с поддержкой step debugging.
+
+### Настройка сервера
+
+1. Откройте **Settings** (Ctrl+Alt+S) → **PHP** → **Servers**
+2. Нажмите **+** для добавления нового сервера
+3. Заполните:
+   - **Name**: `laravel-docker`
+   - **Host**: `localhost`
+   - **Port**: `80`
+   - **Debugger**: `Xdebug`
+4. Включите **Use path mappings**
+5. В колонке **Absolute path on the server** для директории `src` укажите `/var/www/html`
+6. Нажмите **OK**
+
+### Запуск отладки
+
+1. Установите breakpoint в коде (клик слева от номера строки)
+2. Нажмите кнопку **Start Listening for PHP Debug Connections** (иконка телефона в панели инструментов)
+3. Откройте страницу в браузере — PhpStorm автоматически остановится на breakpoint
+
+### Отключение Xdebug
+
+Для отключения Xdebug установите в `.env`:
+
+```dotenv
+XDEBUG_MODE=off
+```
+
+И перезапустите контейнеры: `make restart`
+
+## 7. Полная очистка
 
 Полный сброс окружения и кода приложения:
 
