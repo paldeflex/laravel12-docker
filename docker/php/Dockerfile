@@ -40,4 +40,8 @@ WORKDIR /var/www/html
 
 RUN groupadd -g 1000 www && useradd -u 1000 -ms /bin/bash -g www www
 
+# Configure php-fpm to run as www user
+RUN sed -i "s/user = www-data/user = www/g" /usr/local/etc/php-fpm.d/www.conf && \
+    sed -i "s/group = www-data/group = www/g" /usr/local/etc/php-fpm.d/www.conf
+
 USER www
