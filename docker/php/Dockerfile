@@ -22,8 +22,10 @@ RUN docker-php-ext-install pdo pdo_pgsql pgsql mbstring exif pcntl bcmath gd zip
 # Install Redis extension
 RUN pecl install redis && docker-php-ext-enable redis
 
-# Install Xdebug extension
-RUN pecl install xdebug && docker-php-ext-enable xdebug
+# Install Xdebug extension (with verbose output to debug issues)
+RUN pecl install xdebug \
+    && docker-php-ext-enable xdebug \
+    && php -m | grep -i xdebug
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
