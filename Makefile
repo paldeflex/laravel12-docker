@@ -39,8 +39,6 @@ install:
 	@docker exec -it laravel_php composer create-project laravel/laravel:^12.0 . --no-interaction
 	@echo "Настройка прав доступа..."
 	@sudo chown -R $${UID:-1000}:$${GID:-1000} src/
-	@echo "Генерация ключа приложения..."
-	@docker exec laravel_php php artisan key:generate --force
 	@echo "Настройка БД и Redis в .env..."
 	@docker exec laravel_php bash -c "\
 		cp .env .env.backup && \

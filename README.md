@@ -73,12 +73,11 @@ GID=1000
 1. Останавливает контейнеры и удаляет их
 2. Пересоздаёт директорию src/ с корректными правами.
 3. Собирает и запускает контейнеры (php, nginx, postgres, redis).
-4. Устанавливает Laravel 12 в src/.
-5. Генерирует ключ приложения (APP_KEY).
-6. Обновляет .env Laravel на основе переменных из корневого .env (DB_*, REDIS_*).
-7. Настраивает Laravel для использования Redis (CACHE_STORE, SESSION_DRIVER, QUEUE_CONNECTION).
-8. Проверяет подключение к базе данных.
-9. Запускает миграции (php artisan migrate:fresh --force) и php artisan storage:link.
+4. Устанавливает Laravel 12 в src/ (APP_KEY генерируется автоматически).
+5. Обновляет .env Laravel на основе переменных из корневого .env (DB_*, REDIS_*).
+6. Настраивает Laravel для использования Redis (CACHE_STORE, SESSION_DRIVER, QUEUE_CONNECTION).
+7. Проверяет подключение к базе данных.
+8. Запускает миграции (php artisan migrate:fresh --force) и php artisan storage:link.
 
 После успешной установки приложение доступно по адресу:
 
