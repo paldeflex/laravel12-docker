@@ -13,10 +13,12 @@ RUN apt-get update && apt-get install -y \
     libicu-dev \
     nano \
     && docker-php-ext-install pdo pdo_pgsql pgsql mbstring exif pcntl bcmath gd zip intl opcache \
-    && pecl install redis \
-    && docker-php-ext-enable redis
+    && pecl install redis xdebug \
+    && docker-php-ext-enable redis xdebug
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+COPY xdebug.ini /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 
 RUN echo "memory_limit = 256M" >> /usr/local/etc/php/conf.d/docker-php-memory.ini \
     && echo "upload_max_filesize = 64M" >> /usr/local/etc/php/conf.d/docker-php-memory.ini \

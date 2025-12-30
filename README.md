@@ -174,7 +174,99 @@ http://localhost
   make fresh
 ```
 
-## 6. Полная очистка
+## 6. Настройка Xdebug и PhpStorm
+
+В образ PHP включен Xdebug 3 с поддержкой step debugging.
+
+### Переменные окружения
+
+В файле `.env` можно настроить следующие параметры:
+
+```dotenv
+# Mode: off, develop, coverage, debug, gcstats, profile, trace
+XDEBUG_MODE=debug
+XDEBUG_CLIENT_HOST=host.docker.internal
+XDEBUG_CLIENT_PORT=9003
+XDEBUG_SERVER_NAME=laravel-docker
+```
+
+- `XDEBUG_MODE=off` — отключает Xdebug (рекомендуется для production)
+- `XDEBUG_MODE=debug` — включает step debugging
+- `XDEBUG_MODE=coverage` — для code coverage (PHPUnit)
+
+### Настройка PhpStorm
+
+#### Шаг 1: Настройка PHP Interpreter
+
+1. Откройте **Settings** (Ctrl+Alt+S) → **PHP**
+2. Нажмите **...** рядом с **CLI Interpreter**
+3. Нажмите **+** → **From Docker, Vagrant, VM, WSL, Remote...**
+4. Выберите **Docker Compose**
+5. В **Configuration file(s)** укажите путь к `compose.yaml`
+6. В **Service** выберите `php`
+7. Нажмите **OK**
+
+#### Шаг 2: Настройка Debug
+
+1. Откройте **Settings** → **PHP** → **Debug**
+2. В секции **Xdebug** проверьте:
+   - **Debug port**: `9003`
+   - Включена галочка **Can accept external connections**
+3. Нажмите **Apply**
+
+#### Шаг 3: Настройка сервера
+
+1. Откройте **Settings** → **PHP** → **Servers**
+2. Нажмите **+** для добавления нового сервера
+3. Заполните:
+   - **Name**: `laravel-docker` (должно совпадать с `XDEBUG_SERVER_NAME` в `.env`)
+   - **Host**: `localhost`
+   - **Port**: `80`
+   - **Debugger**: `Xdebug`
+4. Включите **Use path mappings**
+5. В колонке **Absolute path on the server** для директории `src` укажите `/var/www/html`
+6. Нажмите **OK**
+
+#### Шаг 4: Запуск отладки
+
+1. Установите breakpoint в коде (клик слева от номера строки)
+2. Нажмите кнопку **Start Listening for PHP Debug Connections** (иконка телефона в панели инструментов)
+3. Откройте страницу в браузере — PhpStorm автоматически остановится на breakpoint
+
+### Отладка через браузер
+
+Для ручного запуска отладки можно использовать расширение браузера:
+- Chrome: [Xdebug Helper](https://chrome.google.com/webstore/detail/xdebug-helper/eadndfjplgieldjbigjakmdgkmoaaaoc)
+- Firefox: [Xdebug Helper](https://addons.mozilla.org/en-US/firefox/addon/xdebug-helper-for-firefox/)
+
+В настройках расширения укажите IDE key: `PHPSTORM`
+
+### Отладка CLI-команд (Artisan)
+
+Для отладки artisan-команд используйте:
+
+```bash
+make shell
+php artisan your:command
+```
+
+Xdebug автоматически подключится к PhpStorm при выполнении команды.
+
+### Отключение Xdebug
+
+Для повышения производительности в production или при обычной разработке:
+
+1. В файле `.env` установите:
+   ```dotenv
+   XDEBUG_MODE=off
+   ```
+
+2. Перезапустите контейнеры:
+   ```bash
+   make restart
+   ```
+
+## 7. Полная очистка
 
 Полный сброс окружения и кода приложения:
 
