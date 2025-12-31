@@ -16,8 +16,8 @@ RUN apt-get update && apt-get install -y \
     $PHPIZE_DEPS \
     linux-headers-generic || true
 
-# Install PHP extensions
-RUN docker-php-ext-install pdo pdo_pgsql pgsql mbstring exif pcntl bcmath gd zip intl opcache
+# Install PHP extensions (opcache is built-in since PHP 8.5)
+RUN docker-php-ext-install pdo pdo_pgsql pgsql mbstring exif pcntl bcmath gd zip intl
 
 # Install Redis extension
 RUN pecl install redis && docker-php-ext-enable redis
