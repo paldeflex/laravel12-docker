@@ -1,4 +1,4 @@
-# Laravel 12 + Docker (PHP-FPM 8.4, Nginx, PostgreSQL 18, Redis, Xdebug)
+# Laravel 12 + Docker (PHP-FPM 8.5, Nginx, PostgreSQL 18, Redis, Xdebug)
 
 ## 0. Совместимость
 
@@ -34,7 +34,7 @@ REDIS_PORT=6379
 ## 2. Стек и структура
 
 Стек:
-- PHP 8.4 (FPM) — контейнер `laravel_php`
+- PHP 8.5 (FPM) — контейнер `laravel_php`
 - Nginx — контейнер `laravel_nginx`
 - PostgreSQL 18 — контейнер `laravel_postgres`
 - Redis — контейнер `laravel_redis`
