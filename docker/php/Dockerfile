@@ -1,4 +1,4 @@
-FROM php:8.4-fpm
+FROM php:8.5-fpm
 
 # Build arguments for user/group ID (allows customization for different host systems)
 ARG UID=1000
@@ -22,22 +22,21 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libicu-dev \
     nano \
     $PHPIZE_DEPS \
-    # Install PHP extensions
-    && docker-php-ext-install pdo pdo_pgsql pgsql mbstring exif pcntl bcmath gd zip intl opcache \
-    # Install Redis extension
-    && pecl install redis && docker-php-ext-enable redis \
-    # Install Xdebug extension
-    && pecl install xdebug && docker-php-ext-enable xdebug \
-    # Remove build dependencies to reduce image size
-    && apt-get purge -y --auto-remove $PHPIZE_DEPS \
-    && apt-get autoremove -y \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+    linux-headers-generic || true
 
-# Copy Composer from official image (pinned version for reproducibility)
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+# Install PHP extensions (opcache is built-in since PHP 8.5)
+RUN docker-php-ext-install pdo pdo_pgsql pgsql mbstring exif pcntl bcmath gd zip intl
 
-# Copy Xdebug configuration
+# Install Redis extension
+RUN pecl install redis && docker-php-ext-enable redis
+
+# Install Xdebug extension (with verbose output to debug issues)
+RUN pecl install xdebug \
+    && docker-php-ext-enable xdebug \
+    && php -m | grep -i xdebug
+
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
 COPY xdebug.ini /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 
 # Configure PHP settings
@@ -50,5 +49,9 @@ WORKDIR /var/www/html
 
 # Create non-root user with configurable UID/GID
 RUN groupadd -g ${GID} www && useradd -u ${UID} -ms /bin/bash -g www www
+
+# Configure php-fpm to run as www user
+RUN sed -i "s/user = www-data/user = www/g" /usr/local/etc/php-fpm.d/www.conf && \
+    sed -i "s/group = www-data/group = www/g" /usr/local/etc/php-fpm.d/www.conf
 
 USER www

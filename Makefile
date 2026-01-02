@@ -21,6 +21,7 @@ help:
 	@echo "  make artisan    - Выполнить artisan команду"
 	@echo "  make migrate    - Запуск миграций"
 	@echo "  make fresh      - Пересоздание БД с миграциями"
+	@echo "  make test       - Запуск тестов"
 	@echo "  make clean      - Полная очистка"
 	@echo "  make status     - Просмотреть активные контейнеры"
 	@echo "  make logs-redis - Просмотр логов Redis"
@@ -131,6 +132,9 @@ migrate:
 
 fresh:
 	@docker exec laravel_php php artisan migrate:fresh --seed
+
+test:
+	@docker exec laravel_php php artisan test
 
 clean:
 	@printf "Это удалит все данные! Продолжить? [y/N] "
