@@ -1,7 +1,15 @@
 FROM php:8.5-fpm
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
+# Build arguments for user/group ID (allows customization for different host systems)
+ARG UID=1000
+ARG GID=1000
+
+# Install system dependencies, PHP extensions, and cleanup in a single layer
+# This reduces image size by:
+# - Using --no-install-recommends to skip optional packages
+# - Removing build dependencies after compilation
+# - Cleaning apt cache
+RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     curl \
     libpng-dev \
@@ -31,6 +39,7 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 COPY xdebug.ini /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 
+# Configure PHP settings
 RUN echo "memory_limit = 256M" >> /usr/local/etc/php/conf.d/docker-php-memory.ini \
     && echo "upload_max_filesize = 64M" >> /usr/local/etc/php/conf.d/docker-php-memory.ini \
     && echo "post_max_size = 64M" >> /usr/local/etc/php/conf.d/docker-php-memory.ini \
@@ -38,7 +47,8 @@ RUN echo "memory_limit = 256M" >> /usr/local/etc/php/conf.d/docker-php-memory.in
 
 WORKDIR /var/www/html
 
-RUN groupadd -g 1000 www && useradd -u 1000 -ms /bin/bash -g www www
+# Create non-root user with configurable UID/GID
+RUN groupadd -g ${GID} www && useradd -u ${UID} -ms /bin/bash -g www www
 
 # Configure php-fpm to run as www user
 RUN sed -i "s/user = www-data/user = www/g" /usr/local/etc/php-fpm.d/www.conf && \
